@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import Home from "./pages/Home";
-import Favorites from "./pages/Favorites";
 import { PageLayout } from "./layouts/PageLayout";
 
 function App() {
@@ -9,7 +8,6 @@ function App() {
       <PageLayout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/favorites" element={<Favorites />} />
         </Routes>
       </PageLayout>
     </Router>
