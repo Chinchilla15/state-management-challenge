@@ -3,7 +3,7 @@ import Sidebar from "../components/ui/SideBar";
 import CharacterInfo from "../components/CharacterInfo";
 import CharacterInfoItem from "../components/ui/CharacterInfoItem";
 import { useQuery, gql, useReactiveVar } from "@apollo/client";
-import type { Character } from "../utils/types";
+import type { Character, PageProps } from "../utils/types";
 import { useState, useRef, useCallback } from "react";
 import { favoritesVar } from "../apollo/cache";
 
@@ -37,7 +37,7 @@ const GET_CHARACTERS = gql`
   }
 `;
 
-export default function Home() {
+export default function Home({ isMobileView, onCharacterSelect }: PageProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null,
   );
@@ -53,6 +53,7 @@ export default function Home() {
       (character: Character) => character.id === id,
     );
     setSelectedCharacter(character);
+    onCharacterSelect(character);
   };
 
   const handleMore = async () => {
@@ -106,7 +107,7 @@ export default function Home() {
     );
   return (
     <>
-      <Sidebar>
+      <Sidebar className={isMobileView && selectedCharacter ? "hidden" : ""}>
         {data.characters.results.map((character: Character, index: number) => (
           <div
             ref={
@@ -133,64 +134,71 @@ export default function Home() {
           </p>
         )}
       </Sidebar>
-      <CharacterInfo
-        imageSource={selectedCharacter?.image}
-        imageAlt={selectedCharacter?.name}
-      >
-        {selectedCharacter ? (
-          <>
-            <h2 className="text-textDark- mb-4 text-default font-bold">
-              General Information
-            </h2>
-            <CharacterInfoItem title="Name" value={selectedCharacter.name} />
-            <CharacterInfoItem
-              title="Species"
-              value={selectedCharacter.species}
-            />
-            <CharacterInfoItem
-              title="Status"
-              value={selectedCharacter.status}
-            />
-            <CharacterInfoItem
-              title="Gender"
-              value={selectedCharacter.gender}
-            />
-            <CharacterInfoItem
-              title="Location"
-              value={selectedCharacter.location.name}
-            />
-            <CharacterInfoItem
-              title="Origin"
-              value={selectedCharacter.origin.name}
-            />
-            <div className="mt-8">
+      {(!isMobileView || selectedCharacter) && (
+        <CharacterInfo
+          imageSource={selectedCharacter?.image}
+          imageAlt={selectedCharacter?.name}
+          className={
+            isMobileView && selectedCharacter
+              ? "fixed inset-0 z-50 bg-white"
+              : ""
+          }
+        >
+          {selectedCharacter ? (
+            <>
               <h2 className="text-textDark- mb-4 text-default font-bold">
-                Episodes
+                General Information
               </h2>
-              {selectedCharacter.episode.slice(0, 5).map((episode, index) => (
-                <CharacterInfoItem
-                  title={`Episode ${index + 1}`}
-                  value={episode.name}
-                />
-              ))}
-            </div>
-            <button
-              className={`mt-4 rounded px-4 py-2 ${
-                favorites.includes(selectedCharacter.id)
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-200"
-              }`}
-              onClick={() => toggleFavorite(selectedCharacter.id)}
-            >
-              {favorites.includes(selectedCharacter.id)
-                ? "Remove from favorites"
-                : "Add to favorites"}
-            </button>
-          </>
-        ) : (
-          ""
-        )}
-      </CharacterInfo>
+              <CharacterInfoItem title="Name" value={selectedCharacter.name} />
+              <CharacterInfoItem
+                title="Species"
+                value={selectedCharacter.species}
+              />
+              <CharacterInfoItem
+                title="Status"
+                value={selectedCharacter.status}
+              />
+              <CharacterInfoItem
+                title="Gender"
+                value={selectedCharacter.gender}
+              />
+              <CharacterInfoItem
+                title="Location"
+                value={selectedCharacter.location.name}
+              />
+              <CharacterInfoItem
+                title="Origin"
+                value={selectedCharacter.origin.name}
+              />
+              <div className="mt-8">
+                <h2 className="text-textDark- mb-4 text-default font-bold">
+                  Episodes
+                </h2>
+                {selectedCharacter.episode.slice(0, 5).map((episode, index) => (
+                  <CharacterInfoItem
+                    title={`Episode ${index + 1}`}
+                    value={episode.name}
+                  />
+                ))}
+              </div>
+              <button
+                className={`mt-4 rounded px-4 py-2 ${
+                  favorites.includes(selectedCharacter.id)
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-200"
+                }`}
+                onClick={() => toggleFavorite(selectedCharacter.id)}
+              >
+                {favorites.includes(selectedCharacter.id)
+                  ? "Remove from favorites"
+                  : "Add to favorites"}
+              </button>
+            </>
+          ) : (
+            ""
+          )}
+        </CharacterInfo>
+      )}
     </>
   );
 }
