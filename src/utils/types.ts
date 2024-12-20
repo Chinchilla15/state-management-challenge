@@ -26,6 +26,9 @@ export const initialState: FavoritesState = {
 
 export interface PageLayoutProps {
   children: React.ReactNode;
+  isMobileView?: boolean;
+  selectedCharacter?: boolean;
+  onBack?: () => void;
 }
 
 export interface NavItemProps {
@@ -34,6 +37,8 @@ export interface NavItemProps {
   id: string;
   onSelect: (id: string) => void;
   isSelected?: boolean;
+  isFavorite?: boolean;
+  onToggleFavorite: () => void;
 }
 
 type InfoTitle =
@@ -68,4 +73,15 @@ export interface CharacterInfoProps {
   children?: React.ReactNode;
   imageSource?: string;
   imageAlt?: string;
+  className?: string;
+}
+
+export interface SidebarProps {
+  children?: React.ReactNode;
+  className?: string;
+}
+
+export interface PageProps {
+  isMobileView: boolean;
+  onCharacterSelect: (character: Character | null) => void;
 }
