@@ -2,9 +2,10 @@ import NavItem from "../components/NavItem";
 import Sidebar from "../components/ui/SideBar";
 import CharacterInfo from "../components/CharacterInfo";
 import CharacterInfoItem from "../components/ui/CharacterInfoItem";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql, useReactiveVar } from "@apollo/client";
 import type { Character } from "../utils/types";
 import { useState, useRef, useCallback } from "react";
+import { favoritesVar } from "../apollo/cache";
 
 const GET_CHARACTERS = gql`
   query GetCharachters($page: Int) {
@@ -40,6 +41,8 @@ export default function Home() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null,
   );
+
+  const favorites = useReactiveVar(favoritesVar);
 
   const { data, loading, error, fetchMore } = useQuery(GET_CHARACTERS, {
     variables: { page: 1 },
@@ -77,6 +80,16 @@ export default function Home() {
     [loading, data?.characters.info.next],
   );
 
+  const toggleFavorite = (id: string) => {
+    const currentFavorites = favoritesVar();
+    const newFavorites = currentFavorites.includes(id)
+      ? currentFavorites.filter((f) => f !== id)
+      : [...currentFavorites, id];
+
+    favoritesVar(newFavorites);
+    localStorage.setItem("favorites", JSON.stringify(newFavorites));
+  };
+
   if (loading)
     return (
       <Sidebar>
@@ -109,6 +122,8 @@ export default function Home() {
               species={character.species}
               onSelect={handleCharacterSelect}
               isSelected={selectedCharacter?.id === character.id}
+              isFavorite={favorites.includes(character.id)}
+              onToggleFavorite={() => toggleFavorite(character.id)}
             />
           </div>
         ))}
@@ -159,6 +174,18 @@ export default function Home() {
                 />
               ))}
             </div>
+            <button
+              className={`mt-4 rounded px-4 py-2 ${
+                favorites.includes(selectedCharacter.id)
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-200"
+              }`}
+              onClick={() => toggleFavorite(selectedCharacter.id)}
+            >
+              {favorites.includes(selectedCharacter.id)
+                ? "Remove from favorites"
+                : "Add to favorites"}
+            </button>
           </>
         ) : (
           ""
